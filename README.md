@@ -511,11 +511,8 @@ Use the mail command to send a test email:
 
 Inspect the mail logs for errors. Run:
 
-
-	```bash
 	sudo tail -f /var/log/mail.log
-	```
-
+	
 When your script runs, any email-sending errors will appear here.
 
 #### SASL Authentication Error
@@ -531,33 +528,27 @@ When your script runs, any email-sending errors will appear here.
        - Click on "App Passwords" and generate a password for "Mail" and "Linux Computer."
        - Replace the password in /etc/postfix/sasl_passwd with the newly generated App Password:
 	
-	```bash
         [smtp.gmail.com]:587 your_email@gmail.com:your_app_password
-	```
 	
 #### Rehash the Password File
 
 After updating /etc/postfix/sasl_passwd, rehash the file and restart Postfix:
 
-```bash
-sudo postmap /etc/postfix/sasl_passwd
-sudo systemctl restart postfix
-```
+	sudo postmap /etc/postfix/sasl_passwd
+	sudo systemctl restart postfix
 
 **Enable "Allow Less Secure Apps" or Configure OAuth2**
 
     Gmail restricts less secure app access by default.
     If App Passwords are not an option, try enabling "Allow Less Secure Apps" from Gmail settings (not recommended for production environments):
-        - Visit Less Secure App Access and toggle it on.
-        - Note: Google may disable this feature at any time; App Passwords are the preferred method.
+       - Visit Less Secure App Access and toggle it on.
+       - Note: Google may disable this feature at any time; App Passwords are the preferred method.
 
 #### Test the SMTP Authentication
 
 Send a test email and monitor the logs again:
 
-```bash
-echo "This is a test email body." | mail -s "Test Email Subject" your_email@gmail.com
-```
+	echo "This is a test email body." | mail -s "Test Email Subject" your_email@gmail.com
 
 ## Question 5
 
