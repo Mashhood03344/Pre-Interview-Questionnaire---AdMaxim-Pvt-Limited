@@ -96,34 +96,25 @@ Optimized Dockerfile for Building and Deploying Java Application
 
 Run the following command in the directory containing the Dockerfile:
 
-	```bash
-
 	docker build -t java-tomcat-app:latest .
-	```
 
 ***Run the Docker Container**
 
 Start the container with the following command:
 
-	```bash
 	docker run -d -p 3000:3000 --name java-tomcat-container java-tomcat-app:latest
-	```
 	
 **Verify the Running Container**
 
 Check if the container is running:
 
-	```bash
 	docker ps
-	```
 
 **Access the Application**
 
 Open a browser or use curl to access the deployed application:
 
-	```bash
 	curl http://localhost:8080
-	```
 
 ### Explanation of the Optimization in the Dockerfile
 
