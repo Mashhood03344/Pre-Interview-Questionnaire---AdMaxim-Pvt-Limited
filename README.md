@@ -119,7 +119,7 @@ Check if the container is running:
 	docker ps
 	```
 
-**Access the Application++
+**Access the Application**
 
 Open a browser or use curl to access the deployed application:
 
@@ -165,9 +165,9 @@ This step is important because Maven caches downloaded dependencies in the local
 
     The Dockerfile uses the COPY command efficiently:
 
-	```basj
+	```bash
 	COPY --from=builder /app/target/app-java-1.0.0.war /usr/local/tomcat/webapps/ROOT.war
-```
+	```
 
 This ensures that only the necessary WAR file is copied into the final image, and no other build-related files (such as source code or build dependencies) are included in the final runtime image.
 
@@ -681,14 +681,5 @@ https://medium.com/@RoussiAbdelghani/optimizing-java-base-docker-images-size-fro
 
 
 https://docs.oracle.com/en/java/javase/17/
-
-
-
-
-
-
-
-
-
 
 
