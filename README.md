@@ -124,11 +124,11 @@ The optimizations to reduce the size of the Docker image in the Dockerfile can b
 
     **Stage 1: Build Stage (Maven + Git):**
     
-        The first stage uses the maven:3.8-openjdk-11-slim image for building the application. This stage includes all the tools needed for the build process (Maven, Git, etc.), but these tools are not needed in the final runtime image. By separating the build process from the runtime environment, unnecessary tools do not end up in the final image.
+       The first stage uses the maven:3.8-openjdk-11-slim image for building the application. This stage includes all the tools needed for the build process (Maven, Git, etc.), but these tools are not needed in the final runtime image. By separating the build process from the runtime environment, unnecessary tools do not end up in the final image.
     
     **Stage 2: Runtime Stage (Tomcat):**
     
-        The second stage uses the tomcat:9-alpine image, which is a much smaller, lightweight version of Tomcat (based on Alpine Linux). This image includes only the Tomcat server and necessary components for running the application. The build tools like Maven and Git are excluded from this stage, keeping the final image smaller.
+       The second stage uses the tomcat:9-alpine image, which is a much smaller, lightweight version of Tomcat (based on Alpine Linux). This image includes only the Tomcat server and necessary components for running the application. The build tools like Maven and Git are excluded from this stage, keeping the final image smaller.
 
 2. **Cleaning Up After Git Installation:**
 
@@ -231,31 +231,24 @@ This ensures that only the necessary WAR file is copied into the final image, an
 
 ### Command apply the deployment and the service
 
-	```bash
 	kubectl apply -f k8s/deployment.yaml
 	kubectl apply -f k8s/service.yaml
-	```
 
 ### Command to see all the pods in the cluster
 
-	```bash
 	kubectl get pods
-	```
 	
 ### Command to see all the services in the cluster
 
-	```bash
 	kubectl get services
-	```
 	
 ### Command to see the IP address of the Load Balancer 
 
  Once the LoadBalancer is set up, you should be able to access your application via the external IP address provided by the LoadBalancer.
 You can get the external IP using:
 
-	```bash
 	kubectl get svc java-tomcat-app-service
-	```
+	
 
 Look under the EXTERNAL-IP column to find the IP address of the LoadBalancer.
 
@@ -263,15 +256,11 @@ Look under the EXTERNAL-IP column to find the IP address of the LoadBalancer.
 
 **To delete Deployment**
 
-	```bash
 	kubectl delete deployment deployment.yaml
-	```
 	
 **To delete Service**
 
-	```bash
 	kubectl delete service service.yaml
-	```
 
 ## Question 3 
 
@@ -331,7 +320,6 @@ This setup ensures that sensitive infrastructure in private subnets is protected
 
 ## process_logs.sh
 
-	```bash
 	#!/bin/bash
 
 	# Log file location
@@ -368,23 +356,18 @@ This setup ensures that sensitive infrastructure in private subnets is protected
 	fi
 
 	exit 0
-	
-	```
+
 
 ## Commands to Run the Script
 
 **To create the file** 
 
-	```bash
 	nano process_logs.sh
-	```
 
 **To run the script** 
 
-	```bash
 	chmod +x process_logs.sh
 	./process_logs.sh
-	```
 
 ## Emial Notificaiton Configuration
 
@@ -429,43 +412,32 @@ If this is for testing or personal use, you can enter the hostname of your serve
 	
 You can find your system’s hostname by running:
 
-	```bash
 	hostname -f
-	```
 
 - **For a Domain Name:**
 
 If you have a custom domain (e.g., example.com), you can use it. For instance:
 
-	```bash
 	example.com
-	```
 	
 - **If You Don't Have a Domain:**
 
 You can use a generic placeholder, such as:
 
-	```bash
 	localhost
-	```
 	
 or
 
-	```bash
 	localdomain
-	```
 
 #### Configure Postfix for a Relayhost
 
 Edit the Postfix configuration file (/etc/postfix/main.cf) to include an external SMTP server (like Gmail):
 
-	```bash
 	sudo nano /etc/postfix/main.cf
-	```
 	
 **Updated File**
 
-	```bash
 	# General settings
 	smtpd_banner = $myhostname ESMTP $mail_name (Ubuntu)
 	biff = no
@@ -502,21 +474,16 @@ Edit the Postfix configuration file (/etc/postfix/main.cf) to include an externa
 	recipient_delimiter = +
 	inet_interfaces = all
 	inet_protocols = all
-	```
 
 #### Set Up Authentication
 
 Create or edit the file /etc/postfix/sasl_passwd to store your Gmail credentials:
 
-	```bash
 	sudo nano /etc/postfix/sasl_passwd
-	```
 
 Add the following line (replace with your Gmail details):
 
-	```bash
 	[smtp.gmail.com]:587 your_email@gmail.com:your_app_password
-	```
 
     Replace your_email@gmail.com with your Gmail address.
     Replace your_app_password with a Gmail App Password.
@@ -525,35 +492,29 @@ Add the following line (replace with your Gmail details):
 
 Run these commands to secure and hash the file:
 
-	```bash
 	sudo chmod 600 /etc/postfix/sasl_passwd
 	sudo postmap /etc/postfix/sasl_passwd
-	```
 	
 ##### Restart Postfix
 
 Restart the Postfix service to apply changes:
 
-	```bash
 	sudo systemctl restart postfix
-	```
 
 Test Email Sending
 
 Use the mail command to send a test email:
 
-	```bash
 	echo "This is a test email body." | mail -s "Test Email Subject" your_email@gmail.com
-	```
 	
 #### Check Email Sending Logs
 
 Inspect the mail logs for errors. Run:
 
 
-```bash
-sudo tail -f /var/log/mail.log
-```
+	```bash
+	sudo tail -f /var/log/mail.log
+	```
 
 When your script runs, any email-sending errors will appear here.
 
@@ -564,11 +525,11 @@ When your script runs, any email-sending errors will appear here.
     Gmail requires an App Password for third-party applications like Postfix when using your Gmail account for SMTP.
 
     **Steps to generate an App Password:**
-        - Log in to your Gmail account.
-        - Go to Google Account Security Settings.
-        - Under "Signing in to Google", enable 2-Step Verification if not already done.
-        - Click on "App Passwords" and generate a password for "Mail" and "Linux Computer."
-        - Replace the password in /etc/postfix/sasl_passwd with the newly generated App Password:
+       - Log in to your Gmail account.
+       - Go to Google Account Security Settings.
+       - Under "Signing in to Google", enable 2-Step Verification if not already done.
+       - Click on "App Passwords" and generate a password for "Mail" and "Linux Computer."
+       - Replace the password in /etc/postfix/sasl_passwd with the newly generated App Password:
 	
 	```bash
         [smtp.gmail.com]:587 your_email@gmail.com:your_app_password
@@ -634,9 +595,9 @@ There are several strategies and AWS features available to ensure sensitive data
 1. **Use Encryption**
 
    - **Server-Side Encryption (SSE):**
-     - `**SSE-S3:**` S3 automatically encrypts your data using AES-256 when uploading and decrypts when downloading (no management required).
-     - `**SSE-KMS:**` Uses AWS Key Management Service (KMS) to manage encryption keys, providing more control over key management, auditing, and permissions.
-     - `**SSE-C:**` Allows you to manage your own encryption keys. S3 will use the provided key to encrypt/decrypt data.
+     - `SSE-S3:` S3 automatically encrypts your data using AES-256 when uploading and decrypts when downloading (no management required).
+     - `SSE-KMS:` Uses AWS Key Management Service (KMS) to manage encryption keys, providing more control over key management, auditing, and permissions.
+     - `SSE-C:` Allows you to manage your own encryption keys. S3 will use the provided key to encrypt/decrypt data.
    - **Client-Side Encryption:** Encrypt the data before uploading to S3. This ensures the data is encrypted on the client side before it reaches S3.
 
 2. **Enable Bucket Versioning**
@@ -685,10 +646,10 @@ To optimize costs while storing large amounts of data in S3, you can consider th
 
 1. **Use Storage Classes**
 
-   - `**S3 Standard:**` Best for frequently accessed data. It's optimized for high durability, availability, and performance.
-   - `**S3 Infrequent Access (IA):**` For data that is not accessed frequently but needs to be available quickly when needed. This class is cheaper than the Standard class but incurs retrieval costs.
-   - `**S3 One Zone-IA:**` A more cost-effective option than IA, but it stores data in a single availability zone, making it less durable.
-   - `**S3 Glacier and Glacier Deep Archive:**` For archiving data that is rarely accessed. Glacier is low-cost storage for archival data with retrieval times ranging from minutes to hours, and Glacier Deep Archive is even cheaper with longer retrieval times (up to 12 hours).
+   - `S3 Standard:` Best for frequently accessed data. It's optimized for high durability, availability, and performance.
+   - `S3 Infrequent Access (IA):` For data that is not accessed frequently but needs to be available quickly when needed. This class is cheaper than the Standard class but incurs retrieval costs.
+   - `S3 One Zone-IA:` A more cost-effective option than IA, but it stores data in a single availability zone, making it less durable.
+   - `S3 Glacier and Glacier Deep Archive:` For archiving data that is rarely accessed. Glacier is low-cost storage for archival data with retrieval times ranging from minutes to hours, and Glacier Deep Archive is even cheaper with longer retrieval times (up to 12 hours).
 
 2. **Lifecycle Policies**
 
