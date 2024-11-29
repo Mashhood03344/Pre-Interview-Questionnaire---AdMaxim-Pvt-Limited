@@ -40,7 +40,7 @@ https://github.com/admaxim-user/java-project.git
 
 Optimized Dockerfile for Building and Deploying Java Application
               
-	```bash
+	```
 		      
 	# Stage 1: Build the application using Maven (Alpine version)
 	FROM maven:3.8-openjdk-11-slim AS builder
@@ -299,383 +299,427 @@ Here’s how the Bastion Host fits into the setup:
 
 - EC2 instances in private subnets cannot have direct access from the internet for security reasons. They are isolated from the public internet.
 - The Bastion Host in the public subnet provides a secure entry point. Admins or authorized users can SSH into the Bastion Host (which is publicly accessible) and from there, they can SSH into instances in the private subnet.
-2.	Security Considerations:
-•	Access Control: The Bastion Host is typically hardened and tightly controlled. Access is granted based on SSH keys or other secure methods, ensuring that only authorized users can access it.
-•	Minimal Attack Surface: The Bastion Host is the only instance that has inbound internet traffic (usually limited to SSH or RDP), which minimizes the attack surface of the private network.
-•	Audit and Monitoring: The Bastion Host can be used for logging and monitoring all access to private instances, which helps in auditing and detecting any suspicious activities.
-3.	Networking Setup:
-•	The public subnet contains the Bastion Host, which is assigned a public IP to be accessible from the internet.
-•	The private subnet contains the EC2 instances that need to be accessed securely. These instances do not have public IP addresses and can only communicate with the Bastion Host via private IP addresses.
-•	The Bastion Host must be configured with appropriate security groups to allow SSH or RDP access from trusted IP addresses (typically your office or VPN).
-How the Bastion Host Works in This Setup
-1.	SSH or RDP Connection to Bastion Host:
-•	First, the user connects to the Bastion Host over the internet using SSH (for Linux) or RDP (for Windows). The Bastion Host should only allow inbound connections on ports such as 22 (SSH) or 3389 (RDP) from trusted IPs.
-2.	SSH Connection from Bastion Host to Private Instances:
-•	After logging into the Bastion Host, the user can SSH into the EC2 instances in the private subnet using the private IP of the instances.
-•	The private instances don’t have direct public internet access, but by hopping through the Bastion Host, users can securely manage those instances.
-3.	Security Group Setup:
-•	The Bastion Host has a security group that allows inbound access on the required ports (e.g., port 22 for SSH or port 3389 for RDP) only from trusted IP addresses (such as the user's home office IP, VPN, or corporate network).
-•	The EC2 instances in the private subnet have security groups that only allow inbound connections from the Bastion Host’s private IP address, preventing direct access from the public internet.
 
-Example Use Case
-1.	Public Subnet: Contains the Bastion Host (EC2 instance with a public IP).
-2.	Private Subnet: Contains EC2 instances that only have private IPs and cannot be accessed directly from the internet.
-3.	Access Flow:
-•	User connects to the Bastion Host via SSH (using the public IP of the Bastion Host).
-•	From the Bastion Host, the user can SSH to the private instances using their private IPs.
+2. **Security Considerations:**
+
+- Access Control: The Bastion Host is typically hardened and tightly controlled. Access is granted based on SSH keys or other secure methods, ensuring that only authorized users can access it.
+- Minimal Attack Surface: The Bastion Host is the only instance that has inbound internet traffic (usually limited to SSH or RDP), which minimizes the attack surface of the private network.
+- Audit and Monitoring: The Bastion Host can be used for logging and monitoring all access to private instances, which helps in auditing and detecting any suspicious activities.
+- Networking Setup:
+- The public subnet contains the Bastion Host, which is assigned a public IP to be accessible from the internet.
+- The private subnet contains the EC2 instances that need to be accessed securely. These instances do not have public IP addresses and can only communicate with the Bastion Host via private IP addresses.
+- The Bastion Host must be configured with appropriate security groups to allow SSH or RDP access from trusted IP addresses (typically your office or VPN).
+
+## How the Bastion Host Works in This Setup
+
+1. **SSH or RDP Connection to Bastion Host:**
+
+-First, the user connects to the Bastion Host over the internet using SSH (for Linux) or RDP (for Windows). The Bastion Host should only allow inbound connections on ports such as 22 (SSH) or 3389 (RDP) from trusted IPs.
+
+2.**SSH Connection from Bastion Host to Private Instances:**
+
+- After logging into the Bastion Host, the user can SSH into the EC2 instances in the private subnet using the private IP of the instances.
+- The private instances don’t have direct public internet access, but by hopping through the Bastion Host, users can securely manage those instances.
+
+3. **Security Group Setup:**
+
+- The Bastion Host has a security group that allows inbound access on the required ports (e.g., port 22 for SSH or port 3389 for RDP) only from trusted IP addresses (such as the user's home office IP, VPN, or corporate network).
+- The EC2 instances in the private subnet have security groups that only allow inbound connections from the Bastion Host’s private IP address, preventing direct access from the public internet.
+
+## Example Use Case
+
+1. Public Subnet: Contains the Bastion Host (EC2 instance with a public IP).
+2. Private Subnet: Contains EC2 instances that only have private IPs and cannot be accessed directly from the internet.
+3. **Access Flow:**
+ - User connects to the Bastion Host via SSH (using the public IP of the Bastion Host).
+ - From the Bastion Host, the user can SSH to the private instances using their private IPs.
+
 This setup ensures that sensitive infrastructure in private subnets is protected, while still allowing necessary administrative access via the Bastion Host.
 
+## Question 4
 
-Question 4
+**Write a shell script that processes a log file (/var/log/app.log) and outputs a summary of the number of occurrences of each error type (e.g., "ERROR", "WARN", "INFO") in the log. Include error handling & Send an email notification if any of the error types exceeds a count of 10 in this script.**
 
-Write a shell script that processes a log file (/var/log/app.log) and outputs a summary of the number of occurrences of each error type (e.g., "ERROR", "WARN", "INFO") in the log. Include error handling & Send an email notification if any of the error types exceeds a count of 10 in this script.
+## process_logs.sh
 
-process_logs.sh
+	```bash
+	#!/bin/bash
 
-#!/bin/bash
+	# Log file location
+	LOG_FILE="/var/log/app.log"
 
-# Log file location
-LOG_FILE="/var/log/app.log"
+	# Email notification setup
+	TO_EMAIL="your-email@example.com"
+	SUBJECT="Log Alert: High Error Counts in app.log"
 
-# Email notification setup
-TO_EMAIL="your-email@example.com"
-SUBJECT="Log Alert: High Error Counts in app.log"
+	# Check if the log file exists
+	if [[ ! -f "$LOG_FILE" ]]; then
+	  echo "Error: Log file not found at $LOG_FILE"
+	  exit 1
+	fi
 
-# Check if the log file exists
-if [[ ! -f "$LOG_FILE" ]]; then
-  echo "Error: Log file not found at $LOG_FILE"
-  exit 1
-fi
+	# Count occurrences of each log level
+	ERROR_COUNT=$(grep -c "ERROR" "$LOG_FILE")
+	WARN_COUNT=$(grep -c "WARN" "$LOG_FILE")
+	INFO_COUNT=$(grep -c "INFO" "$LOG_FILE")
 
-# Count occurrences of each log level
-ERROR_COUNT=$(grep -c "ERROR" "$LOG_FILE")
-WARN_COUNT=$(grep -c "WARN" "$LOG_FILE")
-INFO_COUNT=$(grep -c "INFO" "$LOG_FILE")
+	# Display the counts
+	echo "Log Summary:"
+	echo "ERROR: $ERROR_COUNT"
+	echo "WARN: $WARN_COUNT"
+	echo "INFO: $INFO_COUNT"
 
-# Display the counts
-echo "Log Summary:"
-echo "ERROR: $ERROR_COUNT"
-echo "WARN: $WARN_COUNT"
-echo "INFO: $INFO_COUNT"
+	# Send an email if any count exceeds 10
+	if [[ "$ERROR_COUNT" -gt 10 || "$WARN_COUNT" -gt 10 || "$INFO_COUNT" -gt 10 ]]; then
+	  MESSAGE="High error counts detected in $LOG_FILE\n\n"
+	  MESSAGE+="ERROR: $ERROR_COUNT\n"
+	  MESSAGE+="WARN: $WARN_COUNT\n"
+	  MESSAGE+="INFO: $INFO_COUNT\n"
+	  echo -e "$MESSAGE" | mail -s "$SUBJECT" "$TO_EMAIL"
+	fi
 
-# Send an email if any count exceeds 10
-if [[ "$ERROR_COUNT" -gt 10 || "$WARN_COUNT" -gt 10 || "$INFO_COUNT" -gt 10 ]]; then
-  MESSAGE="High error counts detected in $LOG_FILE\n\n"
-  MESSAGE+="ERROR: $ERROR_COUNT\n"
-  MESSAGE+="WARN: $WARN_COUNT\n"
-  MESSAGE+="INFO: $INFO_COUNT\n"
-  echo -e "$MESSAGE" | mail -s "$SUBJECT" "$TO_EMAIL"
-fi
+	exit 0
+	
+	```
 
-exit 0
+## Commands to Run the Script
 
+**To create the file** 
 
-Commands to Run the Script
+	```bash
+	nano process_logs.sh
+	```
 
-To create the file 
+**To run the script** 
 
-nano process_logs.sh
+	```bash
+	chmod +x process_logs.sh
+	./process_logs.sh
+	```
 
-To run the script 
-
-chmod +x process_logs.sh
-./process_logs.sh
-
-
-Emial Notificaiton Configuration
+## Emial Notificaiton Configuration
 
 
-Install Required Tools and Dependencies
+**Install Required Tools and Dependencies**
 
-Mailutils: to send email notifications
-Postfix: For email relaying.
+- Mailutils: to send email notifications
+- Postfix: For email relaying.
 
-sudo apt update
+	```bash
+	sudo apt update
+	`
+	sudo apt install mailutils
 
-sudo apt install mailutils
+	sudo apt install postfix mailutils -y
 
-sudo apt install postfix mailutils -y
+	sudo apt install postfix libsasl2-modules
 
-sudo apt install postfix libsasl2-modules
-
-Mailutils: Configuration
+	```
+#### Mailutils: Configuration
 
 When asked to Configure Select 
 
-Internet with smarthost from the menu
+**Internet with smarthost from the menu**
 
-•	Purpose: Configures the server to send outgoing mail via another mail server (a smarthost), while still being able to receive mail directly via SMTP or fetchmail.
+- **Purpose:** Configures the server to send outgoing mail via another mail server (a smarthost), while still being able to receive mail directly via SMTP or fetchmail.
 
 When to choose:
+
 If your ISP or hosting provider requires you to relay mail through their mail server.
 You need outgoing mail to pass through another server for compliance or filtering.
 Example use case: Relaying outgoing mail through smtp.yourprovider.com.
 
-What to Enter for "System Mail Name"
+**What to Enter for "System Mail Name"**
 
-•	For Personal Use:
+- **For Personal Use:**
 If this is for testing or personal use, you can enter the hostname of your server. For example:
 
-your-server-name.local
-
+	```bash
+	your-server-name.local
+	```
+	
 You can find your system’s hostname by running:
 
-hostname -f
+	```bash
+	hostname -f
+	```
 
-•	For a Domain Name:
+- **For a Domain Name:**
 
 If you have a custom domain (e.g., example.com), you can use it. For instance:
 
-example.com
-
-•	If You Don't Have a Domain:
+	```bash
+	example.com
+	```
+	
+- **If You Don't Have a Domain:**
 
 You can use a generic placeholder, such as:
 
-localhost
-
+	```bash
+	localhost
+	```
+	
 or
 
-localdomain
+	```bash
+	localdomain
+	```
 
-
-Configure Postfix for a Relayhost
+#### Configure Postfix for a Relayhost
 
 Edit the Postfix configuration file (/etc/postfix/main.cf) to include an external SMTP server (like Gmail):
 
-sudo nano /etc/postfix/main.cf
+	```bash
+	sudo nano /etc/postfix/main.cf
+	```
+	
+**Updated File**
 
-Updated File
+	```bash
+	# General settings
+	smtpd_banner = $myhostname ESMTP $mail_name (Ubuntu)
+	biff = no
+	append_dot_mydomain = no
+	readme_directory = no
+	compatibility_level = 3.6
 
-# General settings
-smtpd_banner = $myhostname ESMTP $mail_name (Ubuntu)
-biff = no
-append_dot_mydomain = no
-readme_directory = no
-compatibility_level = 3.6
+	# TLS parameters
+	smtpd_tls_cert_file = /etc/ssl/certs/ssl-cert-snakeoil.pem
+	smtpd_tls_key_file = /etc/ssl/private/ssl-cert-snakeoil.key
+	smtpd_tls_security_level = may
+	smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
+	smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 
-# TLS parameters
-smtpd_tls_cert_file = /etc/ssl/certs/ssl-cert-snakeoil.pem
-smtpd_tls_key_file = /etc/ssl/private/ssl-cert-snakeoil.key
-smtpd_tls_security_level = may
-smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
-smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
+	# SASL parameters
+	smtp_sasl_auth_enable = yes
+	smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+	smtp_sasl_security_options = noanonymous
+	smtp_tls_security_level = encrypt
 
-# SASL parameters
-smtp_sasl_auth_enable = yes
-smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
-smtp_sasl_security_options = noanonymous
-smtp_tls_security_level = encrypt
+	# Relay host
+	relayhost = [smtp.gmail.com]:587
 
-# Relay host
-relayhost = [smtp.gmail.com]:587
+	# Restrictions
+	smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_unauth_destination
 
-# Restrictions
-smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_unauth_destination
+	# Networking
+	myhostname = mashhood-HP-EliteBook-840-G5
+	alias_maps = hash:/etc/aliases
+	alias_database = hash:/etc/aliases
+	mydestination = localhost, $myhostname, mashhood-HP-EliteBook-840-G5
+	mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
+	mailbox_size_limit = 0
+	recipient_delimiter = +
+	inet_interfaces = all
+	inet_protocols = all
+	```
 
-# Networking
-myhostname = mashhood-HP-EliteBook-840-G5
-alias_maps = hash:/etc/aliases
-alias_database = hash:/etc/aliases
-mydestination = localhost, $myhostname, mashhood-HP-EliteBook-840-G5
-mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
-mailbox_size_limit = 0
-recipient_delimiter = +
-inet_interfaces = all
-inet_protocols = all
-
-
-Set Up Authentication
+#### Set Up Authentication
 
 Create or edit the file /etc/postfix/sasl_passwd to store your Gmail credentials:
 
-sudo nano /etc/postfix/sasl_passwd
+	```bash
+	sudo nano /etc/postfix/sasl_passwd
+	```
 
 Add the following line (replace with your Gmail details):
 
-[smtp.gmail.com]:587 your_email@gmail.com:your_app_password
+	```bash
+	[smtp.gmail.com]:587 your_email@gmail.com:your_app_password
+	```
 
     Replace your_email@gmail.com with your Gmail address.
     Replace your_app_password with a Gmail App Password.
 
-Secure and Hash the Credentials File
+#### Secure and Hash the Credentials File
 
 Run these commands to secure and hash the file:
 
-sudo chmod 600 /etc/postfix/sasl_passwd
-sudo postmap /etc/postfix/sasl_passwd
-
-Restart Postfix
+	```bash
+	sudo chmod 600 /etc/postfix/sasl_passwd
+	sudo postmap /etc/postfix/sasl_passwd
+	```
+	
+##### Restart Postfix
 
 Restart the Postfix service to apply changes:
 
-sudo systemctl restart postfix
+	```bash
+	sudo systemctl restart postfix
+	```
 
 Test Email Sending
 
 Use the mail command to send a test email:
 
-echo "This is a test email body." | mail -s "Test Email Subject" your_email@gmail.com
-
-Check Email Sending Logs
+	```bash
+	echo "This is a test email body." | mail -s "Test Email Subject" your_email@gmail.com
+	```
+	
+#### Check Email Sending Logs
 
 Inspect the mail logs for errors. Run:
 
+
+```bash
 sudo tail -f /var/log/mail.log
+```
 
 When your script runs, any email-sending errors will appear here.
 
-SASL Authentication Error
+#### SASL Authentication Error
 
-Ensure Correct App Password
+**Ensure Correct App Password**
 
     Gmail requires an App Password for third-party applications like Postfix when using your Gmail account for SMTP.
 
-    Steps to generate an App Password:
-        Log in to your Gmail account.
-        Go to Google Account Security Settings.
-        Under "Signing in to Google", enable 2-Step Verification if not already done.
-        Click on "App Passwords" and generate a password for "Mail" and "Linux Computer."
-        Replace the password in /etc/postfix/sasl_passwd with the newly generated App Password:
-
+    **Steps to generate an App Password:**
+        - Log in to your Gmail account.
+        - Go to Google Account Security Settings.
+        - Under "Signing in to Google", enable 2-Step Verification if not already done.
+        - Click on "App Passwords" and generate a password for "Mail" and "Linux Computer."
+        - Replace the password in /etc/postfix/sasl_passwd with the newly generated App Password:
+	
+	```bash
         [smtp.gmail.com]:587 your_email@gmail.com:your_app_password
-
-Rehash the Password File
+	```
+	
+#### Rehash the Password File
 
 After updating /etc/postfix/sasl_passwd, rehash the file and restart Postfix:
 
+```bash
 sudo postmap /etc/postfix/sasl_passwd
 sudo systemctl restart postfix
+```
 
-Enable "Allow Less Secure Apps" or Configure OAuth2
+**Enable "Allow Less Secure Apps" or Configure OAuth2**
 
     Gmail restricts less secure app access by default.
     If App Passwords are not an option, try enabling "Allow Less Secure Apps" from Gmail settings (not recommended for production environments):
-        Visit Less Secure App Access and toggle it on.
-        Note: Google may disable this feature at any time; App Passwords are the preferred method.
+        - Visit Less Secure App Access and toggle it on.
+        - Note: Google may disable this feature at any time; App Passwords are the preferred method.
 
-Test the SMTP Authentication
+#### Test the SMTP Authentication
 
 Send a test email and monitor the logs again:
 
+```bash
 echo "This is a test email body." | mail -s "Test Email Subject" your_email@gmail.com
+```
+
+## Question 5
+
+**What is Amazon S3, and what are some of the key features of S3 storage? How would you implement security for sensitive data stored in S3, and what options would you use to optimize the cost for storing large amounts of data?**
 
 
-Question 5
-
-What is Amazon S3, and what are some of the key features of S3 storage? How would you implement security for sensitive data stored in S3, and what options would you use to optimize the cost for storing large amounts of data?
-
-
-What is Amazon S3?
+### What is Amazon S3?
 
 Amazon S3 (Simple Storage Service) is an object storage service offered by AWS that provides highly scalable, durable, and low-latency storage for a variety of data types. S3 allows you to store and retrieve any amount of data from anywhere on the web. It is commonly used for backup and restore, archiving, big data analytics, disaster recovery, content distribution, and more.
 
-Key Features of Amazon S3
+#### Key Features of Amazon S3
 
-•	Scalability: S3 scales automatically to handle an infinite amount of data and storage needs. You can store virtually any amount of data without worrying about capacity planning.
+- **Scalability:** S3 scales automatically to handle an infinite amount of data and storage needs. You can store virtually any amount of data without worrying about capacity planning.
 
-•	Durability: S3 provides 99.999999999% (11 9's) durability over a given year, ensuring your data is safe from loss.
+- **Durability:** S3 provides 99.999999999% (11 9's) durability over a given year, ensuring your data is safe from loss.
 
-•	High Availability: S3 is designed to deliver 99.99% availability over a given year, meaning your data will always be available when needed.
+- **High Availability:** S3 is designed to deliver 99.99% availability over a given year, meaning your data will always be available when needed.
 
-•	Security: S3 integrates with AWS IAM (Identity and Access Management), enabling you to control access to your data through policies, bucket ACLs, and encryption.
+- **Security:** S3 integrates with AWS IAM (Identity and Access Management), enabling you to control access to your data through policies, bucket ACLs, and encryption.
 
-•	Storage Classes: S3 offers different storage classes such as Standard, Infrequent Access (IA), One Zone-IA, and Glacier to optimize costs based on data access patterns.
+- **Storage Classes:** S3 offers different storage classes such as Standard, Infrequent Access (IA), One Zone-IA, and Glacier to optimize costs based on data access patterns.
 
-•	Versioning: S3 supports versioning of objects, allowing you to preserve, retrieve, and restore every version of every object in a bucket.
+- **Versioning:** S3 supports versioning of objects, allowing you to preserve, retrieve, and restore every version of every object in a bucket.
 
-•	Lifecycle Policies: S3 allows you to set rules that automate the transition of objects between storage classes or delete them after a specified time.
+- **Lifecycle Policies:** S3 allows you to set rules that automate the transition of objects between storage classes or delete them after a specified time.
 
-•	Access Control: S3 allows fine-grained control over who can access and perform actions on your data using IAM policies, ACLs, and bucket policies.
+- **Access Control:** S3 allows fine-grained control over who can access and perform actions on your data using IAM policies, ACLs, and bucket policies.
 
-•	Event Notifications: S3 can trigger notifications when certain events occur (e.g., an object is uploaded, deleted, etc.) to other AWS services like Lambda, SNS, or SQS.
+- **Event Notifications:** S3 can trigger notifications when certain events occur (e.g., an object is uploaded, deleted, etc.) to other AWS services like Lambda, SNS, or SQS.
 
-Securing Sensitive Data Stored in Amazon S3
+### Securing Sensitive Data Stored in Amazon S3
 
 There are several strategies and AWS features available to ensure sensitive data stored in S3 is protected from unauthorized access:
-1. Use Encryption
-•	Server-Side Encryption (SSE):
 
-SSE-S3: S3 automatically encrypts your data using AES-256 when uploading and decrypts when downloading (no management required).
+1. **Use Encryption**
 
-SSE-KMS: Uses AWS Key Management Service (KMS) to manage encryption keys, providing more control over key management, auditing, and permissions.
+   - **Server-Side Encryption (SSE):**
+     - `**SSE-S3:**` S3 automatically encrypts your data using AES-256 when uploading and decrypts when downloading (no management required).
+     - `**SSE-KMS:**` Uses AWS Key Management Service (KMS) to manage encryption keys, providing more control over key management, auditing, and permissions.
+     - `**SSE-C:**` Allows you to manage your own encryption keys. S3 will use the provided key to encrypt/decrypt data.
+   - **Client-Side Encryption:** Encrypt the data before uploading to S3. This ensures the data is encrypted on the client side before it reaches S3.
 
-SSE-C: Allows you to manage your own encryption keys. S3 will use the provided key to encrypt/decrypt data.
+2. **Enable Bucket Versioning**
 
-•	Client-Side Encryption: Encrypt the data before uploading to S3. This ensures the data is encrypted on the client side before it reaches S3.
+   Enable versioning in the bucket to keep multiple versions of your data, allowing you to restore earlier versions of an object. This can be crucial in recovering from accidental deletions or overwrites.
 
-2. Enable Bucket Versioning
+3. **Use Bucket Policies and Access Control Lists (ACLs)**
 
-    Enable versioning in the bucket to keep multiple versions of your data, allowing you to restore earlier versions of an object. This can be crucial in recovering from accidental deletions or overwrites.
+   - **Bucket Policies:** Use bucket policies to specify who can access the bucket and the actions they can perform. Policies are JSON documents that allow you to define permissions based on factors like IP address, time, and request origin.
+   - **ACLs (Access Control Lists):** Use ACLs to grant access to specific AWS accounts or users for individual objects. ACLs allow you to define read/write permissions on an object level.
 
-3. Use Bucket Policies and Access Control Lists (ACLs)
+4. **Use IAM (Identity and Access Management) Policies**
 
-    Bucket Policies: Use bucket policies to specify who can access the bucket and the actions they can perform. Policies are JSON documents that allow you to define permissions based on factors like IP address, time, and request origin.
+   Define detailed IAM policies to control user and service permissions. Ensure only authorized users or services can access your S3 data. Use principles of least privilege when assigning permissions.
 
-    ACLs (Access Control Lists): Use ACLs to grant access to specific AWS accounts or users for individual objects. ACLs allow you to define read/write permissions on an object level.
+   IAM roles can also be used to allow EC2 instances, Lambda functions, or other AWS services to interact with S3 while maintaining access controls.
 
-4. Use IAM (Identity and Access Management) Policies
+5. **Enable MFA (Multi-Factor Authentication) for Deletions**
 
-    Define detailed IAM policies to control user and service permissions. Ensure only authorized users or services can access your S3 data. Use principles of least privilege when assigning permissions.
+   Protect your S3 buckets from accidental or malicious deletions by requiring MFA for delete operations. You can configure this using MFA Delete, which requires an MFA token to delete objects or versioned data.
 
-    IAM roles can also be used to allow EC2 instances, Lambda functions, or other AWS services to interact with S3 while maintaining access controls.
+6. **Use Access Points for Fine-Grained Access Control**
 
-5. Enable MFA (Multi-Factor Authentication) for Deletions
+   S3 Access Points allow you to create unique access configurations for specific data sets within an S3 bucket. These access points simplify the process of managing access to large datasets or shared buckets, ensuring that only the right users and applications have the correct permissions.
 
-    Protect your S3 buckets from accidental or malicious deletions by requiring MFA for delete operations. You can configure this using MFA Delete, which requires an MFA token to delete objects or versioned data.
+7. **Enable Logging and Monitoring**
 
-6. Use Access Points for Fine-Grained Access Control
+   - **S3 Access Logs:** Enable access logging to capture detailed records of requests made to your bucket, including the IP address, time, request type, and more. You can store these logs in a separate S3 bucket for auditing.
+   - **AWS CloudTrail:** Use AWS CloudTrail to log API calls made to S3 and other AWS services. CloudTrail helps track who accessed your S3 resources, when, and what actions were performed.
 
-    S3 Access Points allow you to create unique access configurations for specific data sets within an S3 bucket. These access points simplify the process of managing access to large datasets or shared buckets, ensuring that only the right users and applications have the correct permissions.
+8. **Use VPC Endpoints for Secure Connections**
 
-7. Enable Logging and Monitoring
+   Use VPC endpoints to securely connect to S3 without exposing your traffic to the public internet. VPC endpoints ensure that data is transferred within AWS’s network, reducing the risk of data interception.
 
-    S3 Access Logs: Enable access logging to capture detailed records of requests made to your bucket, including the IP address, time, request type, and more. You can store these logs in a separate S3 bucket for auditing.
+9. **Use S3 Block Public Access**
 
-    AWS CloudTrail: Use AWS CloudTrail to log API calls made to S3 and other AWS services. CloudTrail helps track who accessed your S3 resources, when, and what actions were performed.
+   Ensure that your S3 bucket and objects are not publicly accessible by using the S3 Block Public Access feature. This feature blocks public access at both the bucket and account levels, preventing any accidental exposure of sensitive data.
 
-8. Use VPC Endpoints for Secure Connections
-
-    Use VPC endpoints to securely connect to S3 without exposing your traffic to the public internet. VPC endpoints ensure that data is transferred within AWS’s network, reducing the risk of data interception.
-
-9. Use S3 Block Public Access
-
-    Ensure that your S3 bucket and objects are not publicly accessible by using the S3 Block Public Access feature. This feature blocks public access at both the bucket and account levels, preventing any accidental exposure of sensitive data.
-
-10. Data Integrity Checks (MD5)
+10. **Data Integrity Checks (MD5)**
 
     Ensure data integrity by verifying checksums. You can configure S3 to return an MD5 checksum upon data upload. When you download the object, you can validate the integrity by comparing the returned checksum.
 
-Optimizing Cost for Storing Large Amounts of Data
+### Optimizing Cost for Storing Large Amounts of Data
 
 To optimize costs while storing large amounts of data in S3, you can consider the following options:
-1. Use Storage Classes
 
-    S3 Standard: Best for frequently accessed data. It's optimized for high durability, availability, and performance.
-    S3 Infrequent Access (IA): For data that is not accessed frequently but needs to be available quickly when needed. This class is cheaper than the Standard class but incurs retrieval costs.
-    S3 One Zone-IA: A more cost-effective option than IA, but it stores data in a single availability zone, making it less durable.
-    S3 Glacier and Glacier Deep Archive: For archiving data that is rarely accessed. Glacier is low-cost storage for archival data with retrieval times ranging from minutes to hours, and Glacier Deep Archive is even cheaper with longer retrieval times (up to 12 hours).
+1. **Use Storage Classes**
 
-2. Lifecycle Policies
+   - `**S3 Standard:**` Best for frequently accessed data. It's optimized for high durability, availability, and performance.
+   - `**S3 Infrequent Access (IA):**` For data that is not accessed frequently but needs to be available quickly when needed. This class is cheaper than the Standard class but incurs retrieval costs.
+   - `**S3 One Zone-IA:**` A more cost-effective option than IA, but it stores data in a single availability zone, making it less durable.
+   - `**S3 Glacier and Glacier Deep Archive:**` For archiving data that is rarely accessed. Glacier is low-cost storage for archival data with retrieval times ranging from minutes to hours, and Glacier Deep Archive is even cheaper with longer retrieval times (up to 12 hours).
 
-    Use lifecycle policies to automatically transition data between storage classes based on age or access patterns. For example, you can move data to Glacier after 30 days of inactivity, or delete data after a certain time.
+2. **Lifecycle Policies**
 
-3. Data Compression
+   Use lifecycle policies to automatically transition data between storage classes based on age or access patterns. For example, you can move data to Glacier after 30 days of inactivity, or delete data after a certain time.
 
-    Compress data before uploading it to S3 to reduce storage costs. S3 does not compress your data by default, so manually compressing large files can significantly reduce storage costs.
+3. **Data Compression**
 
-4. Object Expiry
+   Compress data before uploading it to S3 to reduce storage costs. S3 does not compress your data by default, so manually compressing large files can significantly reduce storage costs.
 
-    Use object expiration policies to automatically delete objects after a specified period of time. This is particularly useful for logs, temporary files, and other non-essential data.
+4. **Object Expiry**
 
-5. Optimize Uploads with Multipart Upload
+   Use object expiration policies to automatically delete objects after a specified period of time. This is particularly useful for logs, temporary files, and other non-essential data.
 
-    For large objects, use Multipart Uploads to upload parts of an object concurrently, which reduces upload time. It also allows you to upload only the parts of an object that have changed, saving on bandwidth and storage costs.
+5. **Optimize Uploads with Multipart Upload**
 
-
-References
+   For large objects, use Multipart Uploads to upload parts of an object concurrently, which reduces upload time. It also allows you to upload only the parts of an object that have changed, saving on bandwidth and storage costs.
 
 
+
+## References
 
 https://medium.com/@RoussiAbdelghani/optimizing-java-base-docker-images-size-from-674mb-to-58mb-c1b7c911f622
 
