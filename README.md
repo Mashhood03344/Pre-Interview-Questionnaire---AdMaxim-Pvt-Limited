@@ -40,7 +40,6 @@ https://github.com/admaxim-user/java-project.git
 
 Optimized Dockerfile for Building and Deploying Java Application
               
-	```
 		      
 	# Stage 1: Build the application using Maven (Alpine version)
 	FROM maven:3.8-openjdk-11-slim AS builder
@@ -90,7 +89,6 @@ Optimized Dockerfile for Building and Deploying Java Application
 	# REPOSITORY        TAG       IMAGE ID       CREATED          SIZE
 	# java-tomcat-app   latest    a615c8eb7bf8   46 seconds ago   117MB
 
-	```
 
 ### Commands to Build and Run the Docker Image
 
