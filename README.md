@@ -170,7 +170,6 @@ This ensures that only the necessary WAR file is copied into the final image, an
 
  **deployment.yaml**
 
-	```bash
 	apiVersion: apps/v1
 	kind: Deployment
 	metadata:
@@ -210,11 +209,9 @@ This ensures that only the necessary WAR file is copied into the final image, an
 		  image: mashhood03344/java-tomcat-app:latest   # Docker image from Docker Hub
 		  ports:
 		    - containerPort: 8080
-	```
 
 **service.yaml**
 
-	```bash
 	apiVersion: v1
 	kind: Service
 	metadata:
@@ -227,7 +224,7 @@ This ensures that only the necessary WAR file is copied into the final image, an
 	      port: 80      # Exposed port on the LoadBalancer
 	      targetPort: 8080   # The port on the container (Tomcat default)
 	  type: LoadBalancer   # Exposes the service externally
-	```
+
 
 ### Command apply the deployment and the service
 
@@ -519,14 +516,16 @@ When your script runs, any email-sending errors will appear here.
 
 **Ensure Correct App Password**
 
-    Gmail requires an App Password for third-party applications like Postfix when using your Gmail account for SMTP.
+Gmail requires an App Password for third-party applications like Postfix when using your Gmail account for SMTP.
 
-    **Steps to generate an App Password:**
-       - Log in to your Gmail account.
-       - Go to Google Account Security Settings.
-       - Under "Signing in to Google", enable 2-Step Verification if not already done.
-       - Click on "App Passwords" and generate a password for "Mail" and "Linux Computer."
-       - Replace the password in /etc/postfix/sasl_passwd with the newly generated App Password:
+**Steps to generate an App Password:**
+- Log in to your Gmail account.
+- Go to Google Account Security Settings.
+- Under "Signing in to Google," enable 2-Step Verification if not already done.
+- Click on "App Passwords" and generate a password for "Mail" and "Linux Computer."
+- Replace the password in `/etc/postfix/sasl_passwd` with the newly generated App Password:
+
+
 	
         [smtp.gmail.com]:587 your_email@gmail.com:your_app_password
 	
@@ -539,10 +538,10 @@ After updating /etc/postfix/sasl_passwd, rehash the file and restart Postfix:
 
 **Enable "Allow Less Secure Apps" or Configure OAuth2**
 
-    Gmail restricts less secure app access by default.
-    If App Passwords are not an option, try enabling "Allow Less Secure Apps" from Gmail settings (not recommended for production environments):
-       - Visit Less Secure App Access and toggle it on.
-       - Note: Google may disable this feature at any time; App Passwords are the preferred method.
+Gmail restricts less secure app access by default.
+If App Passwords are not an option, try enabling "Allow Less Secure Apps" from Gmail settings (not recommended for production environments):
+- Visit Less Secure App Access and toggle it on.
+- Note: Google may disable this feature at any time; App Passwords are the preferred method.
 
 #### Test the SMTP Authentication
 
