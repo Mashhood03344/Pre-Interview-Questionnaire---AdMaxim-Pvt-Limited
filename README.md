@@ -122,13 +122,13 @@ The optimizations to reduce the size of the Docker image in the Dockerfile can b
 
 1. **Multi-Stage Build:**
 
-    **Stage 1: Build Stage (Maven + Git):**
+- **Stage 1: Build Stage (Maven + Git):**
     
-       The first stage uses the maven:3.8-openjdk-11-slim image for building the application. This stage includes all the tools needed for the build process (Maven, Git, etc.), but these tools are not needed in the final runtime image. By separating the build process from the runtime environment, unnecessary tools do not end up in the final image.
+The first stage uses the maven:3.8-openjdk-11-slim image for building the application. This stage includes all the tools needed for the build process (Maven, Git, etc.), but these tools are not needed in the final runtime image. By separating the build process from the runtime environment, unnecessary tools do not end up in the final image.
     
-    **Stage 2: Runtime Stage (Tomcat):**
+- **Stage 2: Runtime Stage (Tomcat):**
     
-       The second stage uses the tomcat:9-alpine image, which is a much smaller, lightweight version of Tomcat (based on Alpine Linux). This image includes only the Tomcat server and necessary components for running the application. The build tools like Maven and Git are excluded from this stage, keeping the final image smaller.
+The second stage uses the tomcat:9-alpine image, which is a much smaller, lightweight version of Tomcat (based on Alpine Linux). This image includes only the Tomcat server and necessary components for running the application. The build tools like Maven and Git are excluded from this stage, keeping the final image smaller.
 
 2. **Cleaning Up After Git Installation:**
 
