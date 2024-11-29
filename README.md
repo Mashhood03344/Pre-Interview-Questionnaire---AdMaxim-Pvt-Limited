@@ -52,13 +52,13 @@ Optimized Dockerfile for Building and Deploying Java Application
 
 	# Clone the repository if not already cloned and pull the latest changes
 	RUN if [ ! -d "/app/java-calculator-app" ]; then \
-		git clone https://github.com/Mashhood03344/java-calculator-app.git; \
+		git clone https://github.com/admaxim-user/java-project.git; \
 	    else \
-		cd java-calculator-app && git pull; \
+		cd java-project && git pull; \
 	    fi
 
 	# Navigate to the cloned repository
-	WORKDIR /app/java-calculator-app
+	WORKDIR /app/jjava-project
 
 	# Build the WAR file (skip tests for faster build)
 	RUN mvn clean package -DskipTests && \
@@ -72,7 +72,7 @@ Optimized Dockerfile for Building and Deploying Java Application
 	WORKDIR /usr/local/tomcat/webapps
 
 	# Copy the WAR file from the build stage to Tomcat as ROOT.war
-	COPY --from=builder /app/java-calculator-app/target/app-java-1.0.0.war /usr/local/tomcat/webapps/ROOT.war
+	COPY --from=builder /app/java-project/target/app-java-1.0.0.war /usr/local/tomcat/webapps/ROOT.war
 
 	# Expose port 8080 to the outside world (Tomcat default)
 	EXPOSE 8080
@@ -462,15 +462,19 @@ Edit the Postfix configuration file (/etc/postfix/main.cf) to include an externa
 	smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_unauth_destination
 
 	# Networking
-	myhostname = mashhood-HP-EliteBook-840-G5
+	myhostname = your-system-name
 	alias_maps = hash:/etc/aliases
 	alias_database = hash:/etc/aliases
-	mydestination = localhost, $myhostname, mashhood-HP-EliteBook-840-G5
+	mydestination = localhost, $myhostname, your-system-name
 	mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
 	mailbox_size_limit = 0
 	recipient_delimiter = +
 	inet_interfaces = all
 	inet_protocols = all
+
+
+**Note**: In the myhostname and in mydestination = localhost, $myhostname, **your-system-name** write your own system name
+
 
 #### Set Up Authentication
 
